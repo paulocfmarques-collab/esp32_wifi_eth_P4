@@ -87,38 +87,36 @@ flowchart TD
 
 ### Simplified Wiring Diagram
 
-```text
-                               +--------------------------------------+
-                               |          ESP32-P4 DevKit            |
-                               |                                      |
-                 +-----------------+             +-------------------+         
-                 |  ETH PHY IP101 |<---------->| RMII / MDC / MDIO |         
-                 |  (Address 1)   |             |  PHY Control Pins |         
-                 +-----------------+             +-------------------+         
-                              |                                      |
-                              |  Ethernet                               |
-                              +--------------------------------------+
-                                       |
-                                       v
-                              +------------------+
-                              |  Ethernet Cable  |
-                              +------------------+
+```mermaid
+flowchart LR
 
-                               +-------------------------+
-                               |   SSD1306 OLED 128x64  |
-                               |   SDA = GPIO 7         |
-                               |   SCL = GPIO 8         |
-                               +-------------------------+
+    ESP[ESP32-P4 DevKit]
 
-                               +-------------------------+
-                               |   LED                   |
-                               |   GPIO 1                |
-                               +-------------------------+
+    PHY[Ethernet PHY IP101]
+    CABLE[Ethernet Network]
 
-                               +-------------------------+
-                               |   Reset Button          |
-                               |   GPIO 2 (pull-up)      |
-                               +-------------------------+
+    OLED[SSD1306 OLED 128x64]
+    LED[Status LED]
+    BTN[Reset Button]
+
+    SDA[GPIO7 SDA]
+    SCL[GPIO8 SCL]
+    GPIO1[GPIO1]
+    GPIO2[GPIO2 Pull-up]
+
+    ESP --> PHY
+    PHY --> CABLE
+
+    ESP --> SDA
+    ESP --> SCL
+    SDA --> OLED
+    SCL --> OLED
+
+    ESP --> GPIO1
+    GPIO1 --> LED
+
+    ESP --> GPIO2
+    GPIO2 --> BTN
 ```
 
 ### Pin Mapping
@@ -248,20 +246,43 @@ sequenceDiagram
 
 ### Wi‑Fi Setup Process
 
-1. Power on the board.
-2. If no stored Wi‑Fi credentials are present, the ESP32 creates an access point.
-3. Connect to `ESP32_P4_CONFIG`.
-4. Open the web page at `192.168.4.1`.
-5. Enter the target SSID and password.
-6. The board saves credentials and restarts.
-7. On restart, it attempts to connect using the saved network settings.
+```mermaid
+flowchart TD
+
+    A[Power On]
+    A --> B{WiFi Credentials Stored?}
+
+    B -->|No| C[Start AP ESP32_P4_CONFIG]
+    C --> D[Open 192.168.4.1]
+    D --> E[Enter SSID Password]
+    E --> F[Save in Preferences]
+    F --> G[Restart ESP32]
+
+    G --> H[Connect to WiFi]
+
+    B -->|Yes| H
+```
 
 ### Factory Reset
 
 The device supports reset behavior through the hardware button and command procedures:
 
-- Press the reset button to trigger configuration clear
-- Use `RESET_WIFI` command via UDP to clear stored Wi‑Fi settings and restart
+```mermaid
+flowchart TD
+
+    START[Reset Request]
+
+    START --> CHOICE{Method}
+
+    CHOICE -->|Button| BTN[Press Reset Button]
+    CHOICE -->|UDP| UDP[RESET_WIFI Command]
+
+    BTN --> CLEAR[Clear WiFi Credentials]
+    UDP --> CLEAR
+
+    CLEAR --> RESTART[Restart Device]
+    RESTART --> PORTAL[Configuration Portal Mode]
+```
 
 ---
 
@@ -324,11 +345,14 @@ This project is intentionally concentrated in a single file:
 
 ## Project Structure
 
-```text
-esp32_wifi_eth_P4/
-├── README.md
-├── wifi_Eth.ino
-└── .gitignore
+```mermaid
+flowchart TD
+
+    ROOT[esp32_wifi_eth_P4]
+
+    ROOT --> README[README.md]
+    ROOT --> MAIN[wifi_Eth.ino]
+    ROOT --> GITIGNORE[.gitignore]
 ```
 
 ---
